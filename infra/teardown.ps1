@@ -1,4 +1,4 @@
-# Teardown script: carga .env y ejecuta cdk destroy
+# Teardown script: ejecuta el script de limpieza boto3
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Definition
 Push-Location $Root
 
@@ -12,23 +12,13 @@ if (Test-Path $EnvFile) {
         $parts = $_ -split '='
         $name = $parts[0].Trim()
         $value = ($parts[1..($parts.Length-1)] -join '=').Trim()
-        $env:$name = $value
+        [System.Environment]::SetEnvironmentVariable($name, $value, "Process")
     }
 } else {
     Write-Host "Aviso: no se encontró .env en el repo root. Usando variables de entorno actuales."
 }
 
-if (-not (Test-Path '.venv')) {
-    Write-Host "Virtualenv no encontrado. Creando uno temporal..."
-    python -m venv .venv
-}
-
-.\.venv\Scripts\Activate.ps1
-
-pip install -r requirements.txt
-
-Write-Host "Ejecutando cdk destroy (confirmaciones automáticas)..."
-cd ..\infra
-cdk destroy --force
+Write-Host "Ejecutando limpieza de recursos..."
+python cleanup_boto3.py
 
 Pop-Location

@@ -14,7 +14,7 @@ if (Test-Path $EnvFile) {
         $name = $parts[0].Trim()
         $value = ($parts[1..($parts.Length-1)] -join '=').Trim()
         Write-Host "Setting env $name=$value"
-        $env:$name = $value
+        [System.Environment]::SetEnvironmentVariable($name, $value, "Process")
     }
 } else {
     Write-Host "Aviso: no se encontró .env en el repo root. Usando variables de entorno actuales."
@@ -33,7 +33,6 @@ Write-Host "Instalando dependencias de infra (puede tardar)..."
 pip install -r requirements.txt
 
 Write-Host "Ejecutando cdk deploy..."
-cd ..\infra
 cdk deploy --require-approval never
 
 Pop-Location
